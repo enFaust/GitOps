@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitOps Project</title>
+    <title>GitOps Calculator</title>
     <link rel="stylesheet" href="src/css/styles.css">
 </head>
 <body>
@@ -11,33 +11,69 @@
         <nav>
             <div class="logo">GitOps</div>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
+                <li><a href="#calculator">Calculator</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section id="home" class="hero">
-            <h1>Welcome to GitOps</h1>
-            <p>A simple web project with HTML, CSS, and JavaScript</p>
-            <button id="cta-button">Get Started</button>
+        <section id="calculator" class="calculator-section">
+            <h1>Simple Calculator</h1>
+            <div class="calculator-container">
+                <div class="display">
+                    <input type="text" id="display" placeholder="0" readonly>
+                </div>
+                
+                <div class="buttons">
+                    <!-- Row 1 -->
+                    <button class="btn clear" onclick="clearDisplay()">C</button>
+                    <button class="btn operator" onclick="appendOperator('/')">/</button>
+                    <button class="btn operator" onclick="appendOperator('*')">×</button>
+                    <button class="btn operator" onclick="appendOperator('-')">−</button>
+                    
+                    <!-- Row 2 -->
+                    <button class="btn number" onclick="appendNumber('7')">7</button>
+                    <button class="btn number" onclick="appendNumber('8')">8</button>
+                    <button class="btn number" onclick="appendNumber('9')">9</button>
+                    <button class="btn operator" onclick="appendOperator('+')">+</button>
+                    
+                    <!-- Row 3 -->
+                    <button class="btn number" onclick="appendNumber('4')">4</button>
+                    <button class="btn number" onclick="appendNumber('5')">5</button>
+                    <button class="btn number" onclick="appendNumber('6')">6</button>
+                    <button class="btn delete" onclick="deleteLastChar()">⌫</button>
+                    
+                    <!-- Row 4 -->
+                    <button class="btn number" onclick="appendNumber('1')">1</button>
+                    <button class="btn number" onclick="appendNumber('2')">2</button>
+                    <button class="btn number" onclick="appendNumber('3')">3</button>
+                    <button class="btn decimal" onclick="appendDecimal()">.</button>
+                    
+                    <!-- Row 5 -->
+                    <button class="btn number zero" onclick="appendNumber('0')">0</button>
+                    <button class="btn equals" onclick="calculate()">=</button>
+                </div>
+            </div>
+            <div class="result" id="result"></div>
         </section>
 
         <section id="about" class="content">
-            <h2>About This Project</h2>
-            <p>This is a basic HTML/CSS project structure with organized folders for styles, scripts, and assets.</p>
-        </section>
-
-        <section id="contact" class="content">
-            <h2>Contact Us</h2>
-            <p>Email: info@gitops.com</p>
+            <h2>About This Calculator</h2>
+            <p>A simple web-based calculator built with HTML, CSS, and JavaScript. Supports basic arithmetic operations: addition, subtraction, multiplication, and division.</p>
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>Basic arithmetic operations</li>
+                <li>Decimal number support</li>
+                <li>Clear and delete functions</li>
+                <li>Responsive design</li>
+                <li>Error handling for division by zero</li>
+            </ul>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2026 GitOps Project. All rights reserved.</p>
+        <p>&copy; 2026 GitOps Calculator. All rights reserved.</p>
     </footer>
 
     <script src="src/js/script.js"></script>
