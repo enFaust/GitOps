@@ -1,137 +1,170 @@
-// Calculator Variables
-let display = document.getElementById('display');
-let result = document.getElementById('result');
-let currentExpression = '';
-let lastOperator = '';
-let lastValue = '';
-
-// Append number to display
-function appendNumber(num) {
-    if (display.value === '0') {
-        display.value = num;
-    } else {
-        display.value += num;
+// Calculator App
+class Calculator {
+    constructor() {
+        this.display = document.getElementById('display');
+        this.result = document.getElementById('result');
+        this.currentValue = '0';
+        this.previousValue = '';
+        this.operation = null;
+        this.shouldResetDisplay = false;
+        
+        this.updateDisplay();
     }
-    result.textContent = '';
-}
 
-// Append operator
-function appendOperator(op) {
-    if (display.value === '') {
-        return;
-    }
-    
-    currentExpression = display.value + ' ' + op + ' ';
-    lastOperator = op;
-    lastValue = display.value;
-    display.value = '';
-    result.textContent = '';
-}
-
-// Add decimal point
-function appendDecimal() {
-    if (display.value === '') {
-        display.value = '0.';
-    } else if (!display.value.includes('.')) {
-        display.value += '.';
-    }
-}
-
-// Clear display
-function clearDisplay() {
-    display.value = '';
-    currentExpression = '';
-    lastOperator = '';
-    lastValue = '';
-    result.textContent = '';
-}
-
-// Delete last character
-function deleteLastChar() {
-    display.value = display.value.toString().slice(0, -1);
-    result.textContent = '';
-}
-
-// Calculate result
-function calculate() {
-    if (display.value === '' || lastOperator === '') {
-        return;
-    }
-    
-    const num1 = parseFloat(lastValue);
-    const num2 = parseFloat(display.value);
-    let calculatedResult;
-    
-    // Perform calculation based on operator
-    switch(lastOperator) {
-        case '+':
-            calculatedResult = num1 + num2;
-            break;
-        case '-':
-            calculatedResult = num1 - num2;
-            break;
-        case '*':
-            calculatedResult = num1 * num2;
-            break;
-        case '/':
-            if (num2 === 0) {
-                showError('Error: Division by zero');
-                return;
+    appendNumber(num) {
+        if (this.shouldResetDisplay) {
+            this.currentValue = String(num);
+            this.shouldResetDisplay = false;
+        } else {
+            if (this.currentValue === '0' && num !== '.') {
+                this.currentValue = String(num);
+            } else if (num === '.' && this.currentValue.includes('.')) {
+                return; // Prevent duplicate decimal points
+            } else {
+                this.currentValue += String(num);
             }
-            calculatedResult = num1 / num2;
-            break;
-        default:
-            return;
+        }
+        this.updateDisplay();
+        this.result.textContent = '';
     }
-    
-    // Format result (remove trailing zeros)
-    const formattedResult = calculatedResult % 1 !== 0 
-        ? calculatedResult.toFixed(10).replace(/\.?0+$/, '')
-        : calculatedResult;
-    
-    display.value = formattedResult;
-    showSuccess(`${lastValue} ${lastOperator} ${num2} = ${formattedResult}`);
-    
-    // Reset for next calculation
-    currentExpression = '';
-    lastOperator = '';
-    lastValue = '';
+
+    appendOperator(op) {
+        if (this.operation !== null && !this.shouldResetDisplay) {
+            this.calculate();
+        }
+        this.previousValue = this.currentValue;
+        this.operation = op;
+        this.shouldResetDisplay = true;
+        this.result.textContent = '';
+    }
+
+    calculate() {
+        if (this.operation === null || this.shouldResetDisplay) {
+            return;
+        }
+
+        let calculation;
+        const prev = parseFloat(this.previousValue);
+        const current = parseFloat(this.currentValue);
+
+        if (isNaN(prev) || isNaN(current)) {
+            this.result.textContent = 'Error: Invalid input';
+            return;
+        }
+
+        switch (this.operation) {
+            case '+':
+                calculation = prev + current;
+                break;
+            case '-':
+                calculation = prev - current;
+                break;
+            case '*':
+                calculation = prev * current;
+                break;
+            case '/':
+                if (current === 0) {
+                    this.showError('Error: Division by zero');
+                    return;
+                }
+                calculation = prev / current;
+                break;
+            default:
+                return;
+        }
+
+        // Format result
+        const formattedResult = Math.round(calculation * 100000000) / 100000000;
+        this.currentValue = String(formattedResult);
+        this.operation = null;
+        this.previousValue = '';
+        this.shouldResetDisplay = true;
+        
+        this.updateDisplay();
+        this.showSuccess(`${prev} ${this.operation} ${current} = ${formattedResult}`);
+    }
+
+    clear() {
+        this.currentValue = '0';
+        this.previousValue = '';
+        this.operation = null;
+        this.shouldResetDisplay = false;
+        this.updateDisplay();
+        this.result.textContent = '';
+    }
+
+    deleteLast() {
+        if (this.currentValue.length > 1) {
+            this.currentValue = this.currentValue.slice(0, -1);
+        } else {
+            this.currentValue = '0';
+        }
+        this.updateDisplay();
+        this.result.textContent = '';
+    }
+
+    updateDisplay() {
+        this.display.value = this.currentValue;
+    }
+
+    showError(message) {
+        this.result.textContent = message;
+        this.result.className = 'result error';
+        setTimeout(() => {
+            this.result.textContent = '';
+            this.result.className = '';
+        }, 3000);
+        this.clear();
+    }
+
+    showSuccess(message) {
+        this.result.textContent = message;
+        this.result.className = 'result success';
+    }
 }
 
-// Show error message
-function showError(message) {
-    result.textContent = message;
-    result.className = 'result error';
-    clearDisplay();
-    setTimeout(() => {
-        result.textContent = '';
-        result.className = '';
-    }, 3000);
+// Initialize calculator
+let calc;
+document.addEventListener('DOMContentLoaded', function() {
+    calc = new Calculator();
+    console.log('Calculator initialized successfully!');
+});
+
+// Global functions for button onclick handlers
+function appendNumber(num) {
+    if (calc) calc.appendNumber(num);
 }
 
-// Show success message
-function showSuccess(message) {
-    result.textContent = message;
-    result.className = 'result success';
+function appendOperator(op) {
+    if (calc) calc.appendOperator(op);
+}
+
+function calculate() {
+    if (calc) calc.calculate();
+}
+
+function clearDisplay() {
+    if (calc) calc.clear();
+}
+
+function deleteLastChar() {
+    if (calc) calc.deleteLast();
 }
 
 // Smooth scrolling for navigation links
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetSection = document.querySelector(targetId);
-        
-        if (targetSection) {
-            targetSection.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if (targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
     });
-});
-
-// Page load event
-window.addEventListener('load', function() {
-    console.log('GitOps Calculator loaded successfully!');
 });

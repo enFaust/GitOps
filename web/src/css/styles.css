@@ -65,10 +65,13 @@ main {
 .calculator-section {
     background: white;
     padding: 3rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     text-align: center;
     margin-bottom: 3rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .calculator-section h1 {
@@ -78,145 +81,162 @@ main {
 }
 
 .calculator-container {
-    max-width: 400px;
-    margin: 0 auto;
     background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Display */
-.display {
+/* Display Section */
+.display-section {
     margin-bottom: 1.5rem;
 }
 
-#display {
+.display-input {
     width: 100%;
-    padding: 1rem;
-    font-size: 2rem;
-    border: 2px solid #3498db;
-    border-radius: 8px;
+    padding: 1.25rem;
+    font-size: 2.5rem;
+    border: 3px solid #3498db;
+    border-radius: 10px;
     text-align: right;
     background-color: #ecf0f1;
     color: #2c3e50;
     font-weight: bold;
-    transition: border-color 0.3s ease;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
 }
 
-#display:focus {
+.display-input:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    background-color: #fff;
 }
 
 /* Buttons Grid */
-.buttons {
+.buttons-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+    gap: 0.85rem;
     margin-bottom: 1.5rem;
 }
 
 .btn {
     padding: 1rem;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    user-select: none;
+}
+
+.btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
 }
 
-.btn:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.btn.number {
-    background-color: #ecf0f1;
+.btn-number {
+    background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
     color: #2c3e50;
+    border: 2px solid #bdc3c7;
 }
 
-.btn.number:hover {
-    background-color: #d5dbdb;
+.btn-number:hover {
+    background: linear-gradient(135deg, #d5dbdb 0%, #bdc3c7 100%);
 }
 
-.btn.operator {
-    background-color: #3498db;
+.btn-operator {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
+    border: 2px solid #2c3e50;
 }
 
-.btn.operator:hover {
-    background-color: #2980b9;
+.btn-operator:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
 }
 
-.btn.equals {
-    background-color: #2ecc71;
+.btn-equals {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
     color: white;
     grid-column: 2 / 4;
+    border: 2px solid #1e8449;
+    font-size: 1.5rem;
 }
 
-.btn.equals:hover {
-    background-color: #27ae60;
+.btn-equals:hover {
+    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
 }
 
-.btn.clear {
-    background-color: #e74c3c;
+.btn-clear {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
+    border: 2px solid #a93226;
 }
 
-.btn.clear:hover {
-    background-color: #c0392b;
+.btn-clear:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
 }
 
-.btn.delete {
-    background-color: #f39c12;
+.btn-delete {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
     color: white;
+    border: 2px solid #b5690e;
 }
 
-.btn.delete:hover {
-    background-color: #d68910;
+.btn-delete:hover {
+    background: linear-gradient(135deg, #d68910 0%, #b5690e 100%);
 }
 
-.btn.decimal {
-    background-color: #9b59b6;
+.btn-decimal {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
     color: white;
+    border: 2px solid #7d3c98;
 }
 
-.btn.decimal:hover {
-    background-color: #8e44ad;
+.btn-decimal:hover {
+    background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
 }
 
-.btn.zero {
+.btn-zero {
     grid-column: 1 / 2;
 }
 
 /* Result Display */
-.result {
+.result-display {
     padding: 1rem;
     font-size: 1.1rem;
     border-radius: 8px;
-    min-height: 1.5rem;
+    min-height: 2rem;
     margin-top: 1rem;
+    background-color: transparent;
+    transition: all 0.3s ease;
 }
 
-.result.error {
+.result-display.error {
     background-color: #fadbd8;
     color: #c0392b;
-    border: 1px solid #e74c3c;
+    border: 2px solid #e74c3c;
+    border-radius: 8px;
+    padding: 1rem;
+    font-weight: 600;
 }
 
-.result.success {
+.result-display.success {
     background-color: #d5f4e6;
     color: #27ae60;
-    border: 1px solid #2ecc71;
+    border: 2px solid #2ecc71;
+    border-radius: 8px;
+    padding: 1rem;
+    font-weight: 600;
 }
 
 /* Content Sections */

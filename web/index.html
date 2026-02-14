@@ -19,55 +19,60 @@
 
     <main>
         <section id="calculator" class="calculator-section">
-            <h1>Simple Calculator</h1>
+            <h1>Calculator</h1>
             <div class="calculator-container">
-                <div class="display">
-                    <input type="text" id="display" placeholder="0" readonly>
+                <div class="display-section">
+                    <input type="text" id="display" placeholder="0" readonly class="display-input">
                 </div>
                 
-                <div class="buttons">
-                    <!-- Row 1 -->
-                    <button class="btn clear" onclick="clearDisplay()">C</button>
-                    <button class="btn operator" onclick="appendOperator('/')">/</button>
-                    <button class="btn operator" onclick="appendOperator('*')">×</button>
-                    <button class="btn operator" onclick="appendOperator('-')">−</button>
+                <div class="buttons-grid">
+                    <button class="btn btn-clear" onclick="clearDisplay()">C</button>
+                    <button class="btn btn-delete" onclick="deleteLastChar()">⌫</button>
+                    <button class="btn btn-operator" onclick="appendOperator('/')">/</button>
+                    <button class="btn btn-operator" onclick="appendOperator('*')">×</button>
                     
-                    <!-- Row 2 -->
-                    <button class="btn number" onclick="appendNumber('7')">7</button>
-                    <button class="btn number" onclick="appendNumber('8')">8</button>
-                    <button class="btn number" onclick="appendNumber('9')">9</button>
-                    <button class="btn operator" onclick="appendOperator('+')">+</button>
+                    <button class="btn btn-number" onclick="appendNumber('7')">7</button>
+                    <button class="btn btn-number" onclick="appendNumber('8')">8</button>
+                    <button class="btn btn-number" onclick="appendNumber('9')">9</button>
+                    <button class="btn btn-operator" onclick="appendOperator('-')">−</button>
                     
-                    <!-- Row 3 -->
-                    <button class="btn number" onclick="appendNumber('4')">4</button>
-                    <button class="btn number" onclick="appendNumber('5')">5</button>
-                    <button class="btn number" onclick="appendNumber('6')">6</button>
-                    <button class="btn delete" onclick="deleteLastChar()">⌫</button>
+                    <button class="btn btn-number" onclick="appendNumber('4')">4</button>
+                    <button class="btn btn-number" onclick="appendNumber('5')">5</button>
+                    <button class="btn btn-number" onclick="appendNumber('6')">6</button>
+                    <button class="btn btn-operator" onclick="appendOperator('+')">+</button>
                     
-                    <!-- Row 4 -->
-                    <button class="btn number" onclick="appendNumber('1')">1</button>
-                    <button class="btn number" onclick="appendNumber('2')">2</button>
-                    <button class="btn number" onclick="appendNumber('3')">3</button>
-                    <button class="btn decimal" onclick="appendDecimal()">.</button>
+                    <button class="btn btn-number" onclick="appendNumber('1')">1</button>
+                    <button class="btn btn-number" onclick="appendNumber('2')">2</button>
+                    <button class="btn btn-number" onclick="appendNumber('3')">3</button>
+                    <button class="btn btn-decimal" onclick="appendNumber('.')">.</button>
                     
-                    <!-- Row 5 -->
-                    <button class="btn number zero" onclick="appendNumber('0')">0</button>
-                    <button class="btn equals" onclick="calculate()">=</button>
+                    <button class="btn btn-number btn-zero" onclick="appendNumber('0')">0</button>
+                    <button class="btn btn-equals" onclick="calculate()">=</button>
                 </div>
+                
+                <div id="result" class="result-display"></div>
             </div>
-            <div class="result" id="result"></div>
         </section>
 
         <section id="about" class="content">
             <h2>About This Calculator</h2>
-            <p>A simple web-based calculator built with HTML, CSS, and JavaScript. Supports basic arithmetic operations: addition, subtraction, multiplication, and division.</p>
+            <p>A fully functional web-based calculator built with HTML, CSS, and JavaScript.</p>
+            <p><strong>Supported Operations:</strong></p>
+            <ul>
+                <li>Addition (+)</li>
+                <li>Subtraction (−)</li>
+                <li>Multiplication (×)</li>
+                <li>Division (/)</li>
+                <li>Decimal numbers</li>
+            </ul>
             <p><strong>Features:</strong></p>
             <ul>
-                <li>Basic arithmetic operations</li>
-                <li>Decimal number support</li>
-                <li>Clear and delete functions</li>
-                <li>Responsive design</li>
-                <li>Error handling for division by zero</li>
+                <li>✓ Clear button to reset calculator</li>
+                <li>✓ Delete button to remove last digit</li>
+                <li>✓ Decimal point support</li>
+                <li>✓ Division by zero error handling</li>
+                <li>✓ Responsive design for all devices</li>
+                <li>✓ Real-time calculation display</li>
             </ul>
         </section>
     </main>
