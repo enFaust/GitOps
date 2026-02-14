@@ -1,0 +1,70 @@
+{
+  "environments": {
+    "development": {
+      "name": "Development",
+      "description": "Development environment for integration testing",
+      "url": "https://enFaust.github.io/GitOps-dev",
+      "branch": "develop",
+      "features": {
+        "debugging": true,
+        "console_logs": true,
+        "performance_monitoring": false,
+        "analytics": false
+      },
+      "database": "dev-db",
+      "cache_enabled": false,
+      "api_timeout": 30000
+    },
+    "staging": {
+      "name": "Staging",
+      "description": "Staging environment for pre-production testing",
+      "url": "https://enFaust.github.io/GitOps-staging",
+      "branch": "staging",
+      "features": {
+        "debugging": true,
+        "console_logs": false,
+        "performance_monitoring": true,
+        "analytics": true
+      },
+      "database": "staging-db",
+      "cache_enabled": true,
+      "api_timeout": 15000
+    },
+    "production": {
+      "name": "Production",
+      "description": "Production environment - live user-facing",
+      "url": "https://enFaust.github.io/GitOps",
+      "branch": "main",
+      "features": {
+        "debugging": false,
+        "console_logs": false,
+        "performance_monitoring": true,
+        "analytics": true
+      },
+      "database": "prod-db",
+      "cache_enabled": true,
+      "api_timeout": 5000
+    }
+  },
+  "deploymentRules": {
+    "develop": {
+      "requireTests": true,
+      "requireReview": false,
+      "autoMerge": false,
+      "protectionRules": false
+    },
+    "staging": {
+      "requireTests": true,
+      "requireReview": true,
+      "autoMerge": false,
+      "protectionRules": true
+    },
+    "main": {
+      "requireTests": true,
+      "requireReview": true,
+      "autoMerge": false,
+      "protectionRules": true,
+      "requireHealthChecks": true
+    }
+  }
+}
