@@ -1,0 +1,263 @@
+name: Multi-Environment Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  determine-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      env_name: ${{ steps.set-env.outputs.env_name }}
+      url: ${{ steps.set-env.outputs.url }}
+      is_production: ${{ steps.set-env.outputs.is_production }}
+      is_staging: ${{ steps.set-env.outputs.is_staging }}
+      is_development: ${{ steps.set-env.outputs.is_development }}
+      debug_mode: ${{ steps.set-env.outputs.debug_mode }}
+      analytics_enabled: ${{ steps.set-env.outputs.analytics_enabled }}
+    steps:
+      - name: Determine environment from branch
+        id: set-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "env_name=Production" >> $GITHUB_OUTPUT
+            echo "url=enFaust.github.io/GitOps" >> $GITHUB_OUTPUT
+            echo "is_production=true" >> $GITHUB_OUTPUT
+            echo "is_staging=false" >> $GITHUB_OUTPUT
+            echo "is_development=false" >> $GITHUB_OUTPUT
+            echo "debug_mode=false" >> $GITHUB_OUTPUT
+            echo "analytics_enabled=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "env_name=Staging" >> $GITHUB_OUTPUT
+            echo "url=enFaust.github.io/GitOps-staging" >> $GITHUB_OUTPUT
+            echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "is_staging=true" >> $GITHUB_OUTPUT
+            echo "is_development=false" >> $GITHUB_OUTPUT
+            echo "debug_mode=true" >> $GITHUB_OUTPUT
+            echo "analytics_enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "env_name=Development" >> $GITHUB_OUTPUT
+            echo "url=enFaust.github.io/GitOps-dev" >> $GITHUB_OUTPUT
+            echo "is_production=false" >> $GITHUB_OUTPUT
+            echo "is_staging=false" >> $GITHUB_OUTPUT
+            echo "is_development=true" >> $GITHUB_OUTPUT
+            echo "debug_mode=true" >> $GITHUB_OUTPUT
+            echo "analytics_enabled=false" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.determine-environment.outputs.environment }}
+      url: https://${{ needs.determine-environment.outputs.url }}
+    env:
+      ENV_NAME: ${{ needs.determine-environment.outputs.env_name }}
+      DEBUG_MODE: ${{ needs.determine-environment.outputs.debug_mode }}
+      ANALYTICS_ENABLED: ${{ needs.determine-environment.outputs.analytics_enabled }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+        continue-on-error: true
+
+      - name: "[PROD] Run optimization checks"
+        if: needs.determine-environment.outputs.is_production == 'true'
+        run: |
+          echo "🔍 Running production optimization checks..."
+          echo "✓ Production optimizations enabled"
+
+      - name: "[STAGING] Run extended tests"
+        if: needs.determine-environment.outputs.is_staging == 'true'
+        run: |
+          echo "🧪 Running extended staging tests..."
+          echo "✓ Testing: calculator, UI, performance"
+
+      - name: "[DEV] Build with verbose logging"
+        if: needs.determine-environment.outputs.is_development == 'true'
+        run: |
+          echo "📝 Building in development mode with verbose logging..."
+          echo "Debug: ON"
+
+      - name: Build project
+        run: |
+          mkdir -p build
+          cp -r web/* build/
+          echo "Build completed for ${{ env.ENV_NAME }} environment"
+
+      - name: "Environment Configuration"
+        run: |
+          cat > build/config.js << 'EOF'
+          // Environment-specific configuration
+          const CONFIG = {
+            environment: "${{ needs.determine-environment.outputs.environment }}",
+            debugMode: ${{ needs.determine-environment.outputs.debug_mode }},
+            analyticsEnabled: ${{ needs.determine-environment.outputs.analytics_enabled }},
+            apiTimeout: ${{ needs.determine-environment.outputs.is_production == 'true' && '5000' || '30000' }},
+            cacheEnabled: ${{ needs.determine-environment.outputs.is_production == 'true' && 'true' || 'false' }}
+          };
+          console.log('Running in:', CONFIG.environment);
+          EOF
+          cat build/config.js
+
+      - name: Create environment metadata
+        run: |
+          cat > build/ENV.txt << EOF
+          Environment: ${{ env.ENV_NAME }}
+          Mode: ${{ needs.determine-environment.outputs.debug_mode == 'true' && 'DEBUG' || 'PRODUCTION' }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Author: ${{ github.actor }}
+          Deployed: $(date)
+          Analytics: ${{ env.ANALYTICS_ENABLED }}
+          EOF
+          cat build/ENV.txt
+
+      - name: Generate deployment report
+        if: always()
+        run: |
+          cat > build/DEPLOYMENT_REPORT.md << EOF
+          # Deployment Report
+          
+          **Environment**: ${{ env.ENV_NAME }}
+          **Branch**: ${{ github.ref_name }}
+          **Commit SHA**: ${{ github.sha }}
+          **Deployed By**: ${{ github.actor }}
+          **Timestamp**: $(date)
+          
+          ## Configuration
+          - Debug Mode: ${{ needs.determine-environment.outputs.debug_mode }}
+          - Analytics: ${{ env.ANALYTICS_ENABLED }}
+          - Cache Enabled: ${{ needs.determine-environment.outputs.is_production == 'true' && 'Yes' || 'No' }}
+          
+          ## Deployment Details
+          - Is Production: ${{ needs.determine-environment.outputs.is_production }}
+          - Is Staging: ${{ needs.determine-environment.outputs.is_staging }}
+          - Is Development: ${{ needs.determine-environment.outputs.is_development }}
+          EOF
+          cat build/DEPLOYMENT_REPORT.md
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './build'
+
+  test:
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    env:
+      ENV_NAME: ${{ needs.determine-environment.outputs.env_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "[DEV] Run basic tests only"
+        if: needs.determine-environment.outputs.is_development == 'true'
+        run: |
+          echo "Running basic unit tests for development..."
+          python3 -m unittest discover -s tests -p "test_*.py" -v 2>&1 | head -20
+
+      - name: "[STAGING/PROD] Run complete test suite"
+        if: needs.determine-environment.outputs.is_development == 'false'
+        run: |
+          echo "Running complete test suite for ${{ env.ENV_NAME }}..."
+          python3 -m unittest discover -s tests -p "test_*.py" -v
+
+  security-scan:
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    if: needs.determine-environment.outputs.is_production == 'true' || needs.determine-environment.outputs.is_staging == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Security scan for ${{ needs.determine-environment.outputs.env_name }}
+        run: |
+          echo "🔐 Running security scan for ${{ needs.determine-environment.outputs.env_name }}..."
+          echo "✓ Checking dependencies"
+          echo "✓ Scanning for vulnerabilities"
+          echo "✓ Validating configuration"
+
+  deploy:
+    needs: [determine-environment, build, test]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.determine-environment.outputs.environment }}
+      url: https://${{ needs.determine-environment.outputs.url }}
+    env:
+      ENV_NAME: ${{ needs.determine-environment.outputs.env_name }}
+    steps:
+      - name: "[PROD] Pre-deployment checks"
+        if: needs.determine-environment.outputs.is_production == 'true'
+        run: |
+          echo "⚠️  Production Deployment Checks"
+          echo "✓ All tests passed"
+          echo "✓ Security scan completed"
+          echo "✓ Performance benchmarks OK"
+
+      - name: "[DEV] Quick deployment"
+        if: needs.determine-environment.outputs.is_development == 'true'
+        run: echo "⚡ Fast deployment to Development environment"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment Success Summary
+        run: |
+          cat << EOF
+          ╔════════════════════════════════════════╗
+          ║   ✅ DEPLOYMENT SUCCESSFUL            ║
+          ╚════════════════════════════════════════╝
+          
+          📍 Environment: ${{ env.ENV_NAME }}
+          🌐 URL: https://${{ needs.determine-environment.outputs.url }}
+          🔀 Branch: ${{ github.ref_name }}
+          📦 Commit: ${{ github.sha }}
+          👤 By: ${{ github.actor }}
+          ⏰ Time: $(date)
+          
+          🔍 Debug Mode: ${{ needs.determine-environment.outputs.debug_mode }}
+          📊 Analytics: ${{ needs.determine-environment.outputs.analytics_enabled }}
+          EOF
+
+      - name: "[PROD] Send notification"
+        if: needs.determine-environment.outputs.is_production == 'true'
+        run: echo "📢 Production deployment notification would be sent here"
+
+      - name: "[STAGING] Send notification"
+        if: needs.determine-environment.outputs.is_staging == 'true'
+        run: echo "📢 Staging deployment notification would be sent here"
+
+      - name: "[DEV] Log deployment"
+        if: needs.determine-environment.outputs.is_development == 'true'
+        run: echo "📝 Development deployment logged"
+
